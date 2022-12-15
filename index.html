@@ -14734,13 +14734,14 @@ For our purposes we will just take some of their better presets as a base model.
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[1]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[12]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">torch.nn.functional</span> <span class="k">as</span> <span class="nn">F</span>
 <span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">Tensor</span>
+<span class="kn">from</span> <span class="nn">torch.nn</span> <span class="kn">import</span> <span class="n">Parameter</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
@@ -14932,7 +14933,7 @@ The paper stipulated a standard decoder so this is what we built, this includes 
             <span class="n">decoder_layer</span><span class="p">,</span> <span class="n">num_layers</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">decoder_norm</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">linear</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_embeddings</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span>
             <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="n">seq_length</span><span class="p">,</span> <span class="n">seq_length</span><span class="p">])</span><span class="o">.</span><span class="n">tril</span><span class="p">())</span>
 
     <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
@@ -15249,7 +15250,10 @@ jp-needs-light-background
 </li>
 </ul>
 <h3 id="Proposed-ideas">Proposed ideas<a class="anchor-link" href="#Proposed-ideas">&#182;</a></h3><ul>
-<li>Okay we have some reasons to believe we might be able to accomplish the task</li>
+<li>Okay we have some reasons to believe we might be able to accomplish the task<ul>
+<li>This looks like enforcing some &quot;smallness&quot; rules on our singular values</li>
+</ul>
+</li>
 <li>Lets implement something things and test our assumptions</li>
 </ul>
 
@@ -15279,7 +15283,7 @@ jp-needs-light-background
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[10]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[11]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">householder</span><span class="p">(</span><span class="n">vector</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">):</span>
@@ -15293,6 +15297,370 @@ jp-needs-light-background
      </div>
 </div>
 </div>
+</div>
+
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h4 id="Implementation-of-Necessary-classes">Implementation of Necessary classes<a class="anchor-link" href="#Implementation-of-Necessary-classes">&#182;</a></h4><ul>
+<li>Essentially we want a linear layer that stores the singular values</li>
+<li>It's useful to abstract the house holder matrices to modules<ul>
+<li>We can vary the number of house holder matrices later</li>
+</ul>
+</li>
+</ul>
+<h4 id="Glossed-over-but-non-square-weight-matrices-are-annoying">Glossed over but non square weight matrices are annoying<a class="anchor-link" href="#Glossed-over-but-non-square-weight-matrices-are-annoying">&#182;</a></h4><ul>
+<li>Defined as follows $W \in R^{(N, M)}$<ul>
+<li>$U \in R^{(N, N)}$, $S \in R^{(N, M)}$, $M \in R^{(M, M)}$</li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[87]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">torch.nn</span> <span class="kn">import</span> <span class="n">init</span>
+<span class="k">class</span> <span class="nc">HouseOrth</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">N</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="c1"># random initialization... this could be improved</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">U</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">householder</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="mi">1</span><span class="p">))))</span>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">):</span>
+        <span class="c1">#print(f&quot; x: {x.shape}, self.U: {self.U.shape},&quot;)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">U</span> <span class="o">@</span> <span class="n">x</span> <span class="c1"># I don&#39;t like transposition hell... hopefully this isn&#39;t a stability issue</span>
+
+<span class="k">class</span> <span class="nc">LinearSVD</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_features</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">out_features</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">bias</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="n">N</span><span class="p">,</span><span class="n">M</span> <span class="o">=</span> <span class="n">in_features</span><span class="p">,</span> <span class="n">out_features</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">in_features</span> <span class="o">=</span> <span class="n">in_features</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">out_features</span> <span class="o">=</span> <span class="n">out_features</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">U</span> <span class="o">=</span> <span class="n">HouseOrth</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+        <span class="c1"># we normalize the singular values in the multiplication - smart initialization probably doesn&#39;t matter too much</span>
+        <span class="c1"># and if it does we do not know what that would be</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">singulars</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">M</span><span class="p">)</span><span class="o">.</span><span class="n">uniform_</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">out_features</span><span class="p">),</span> <span class="mi">1</span><span class="o">/</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">in_features</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">M</span><span class="p">))</span> <span class="c1"># singulars are trainable - the matrix isn&#39;t (only the diagonal are parameters)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">V</span> <span class="o">=</span> <span class="n">HouseOrth</span><span class="p">(</span><span class="n">M</span><span class="p">)</span> <span class="c1"># Whether or not this is transposed doesn&#39;t really matter - its valid either way just a diff matrix</span>
+        <span class="c1"># copy torch.nn.Linear for what its worth here</span>
+        <span class="k">if</span> <span class="n">bias</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bias</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">out_features</span><span class="p">,))</span>
+            <span class="n">step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">U</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">singulars</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">S</span><span class="p">)</span>
+            <span class="n">fan_in</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">init</span><span class="o">.</span><span class="n">_calculate_fan_in_and_fan_out</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">V</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">U</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">singulars</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">S</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">))</span>
+            <span class="n">bound</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">fan_in</span><span class="p">)</span> <span class="k">if</span> <span class="n">fan_in</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span>
+            <span class="n">init</span><span class="o">.</span><span class="n">uniform_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bias</span><span class="p">,</span> <span class="o">-</span><span class="n">bound</span><span class="p">,</span> <span class="n">bound</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">register_parameter</span><span class="p">(</span><span class="s1">&#39;bias&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">V</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">U</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">T</span><span class="p">)</span> <span class="o">@</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">singulars</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">singulars</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">S</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">bias</span>
+    
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h4 id="Test-how-well-this-learns-on-full-batch-mnist">Test how well this learns on full batch mnist<a class="anchor-link" href="#Test-how-well-this-learns-on-full-batch-mnist">&#182;</a></h4><ul>
+<li>Use simple linear model</li>
+</ul>
+
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[40]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow.keras.datasets.mnist</span> <span class="k">as</span> <span class="nn">mnist</span>
+<span class="p">(</span><span class="n">x_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">),</span> <span class="p">(</span><span class="n">x_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span> <span class="o">=</span> <span class="n">mnist</span><span class="o">.</span><span class="n">load_data</span><span class="p">()</span>
+<span class="n">x_train</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">x_train</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">x_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">math</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">x_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+<span class="n">y_train</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">y_train</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+
+<span class="n">x_test</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">x_test</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">x_test</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">math</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">x_test</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+<span class="n">y_test</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">y_test</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[88]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Model</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">useSVD</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="c1"># to compare how bad this does</span>
+        <span class="k">if</span> <span class="n">useSVD</span><span class="p">:</span>
+            <span class="n">Linear</span> <span class="o">=</span> <span class="n">LinearSVD</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">Linear</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fc1</span> <span class="o">=</span> <span class="n">Linear</span><span class="p">(</span><span class="mi">784</span><span class="p">,</span> <span class="mi">128</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fc2</span> <span class="o">=</span> <span class="n">Linear</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fc3</span> <span class="o">=</span> <span class="n">Linear</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fc1</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fc2</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fc3</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h4 id="Compare-linearSVD-with-Linear">Compare linearSVD with Linear<a class="anchor-link" href="#Compare-linearSVD-with-Linear">&#182;</a></h4><ul>
+<li>We cannot use Adam on HouseOrth</li>
+<li>We can on singulars</li>
+<li>We do not care about generalization on mnist<ul>
+<li>Only inspecting training accuracies</li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[89]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">segmentHouseHolderParameters</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns tuple[0] = HouseParameters for SGD optimizer </span>
+<span class="sd">    tuple[1] = All other Parameters for Adam</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">houseParams</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">otherParams</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">module</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">modules</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">HouseOrth</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">module</span><span class="o">.</span><span class="n">parameters</span><span class="p">(</span><span class="kc">False</span><span class="p">):</span> <span class="n">houseParams</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> 
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">module</span><span class="o">.</span><span class="n">parameters</span><span class="p">(</span><span class="kc">False</span><span class="p">):</span> <span class="n">otherParams</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">houseParams</span><span class="p">,</span> <span class="n">otherParams</span>
+
+<span class="k">def</span> <span class="nf">getOptimizers</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Optimizers get unhappy when you give them an empty list, so we don&#39;t do that</span>
+<span class="sd">    Just an abstraction to avoid rewriting a lot of code</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">hParams</span><span class="p">,</span> <span class="n">nParams</span> <span class="o">=</span> <span class="n">segmentHouseHolderParameters</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="n">optimizers</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Optimizer</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">hParams</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">optimizers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="n">hParams</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="mf">3e-3</span><span class="p">))</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nParams</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">optimizers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">nParams</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="mf">3e-4</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">optimizers</span> 
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[90]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">minibatchTrain</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span> <span class="n">optimizers</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Optimizer</span><span class="p">],</span> <span class="n">epochs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tensor</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Train the model, return list of accuracies</span>
+<span class="sd">    the optimizers are a list because we want to be able to use different optimizers</span>
+<span class="sd">    on different parameters in the network. </span>
+
+<span class="sd">    Our problem doesn&#39;t do minibatching - but not minibatching makes result pretty unstable so for testing we use minibatching.</span>
+<span class="sd">    Note: I refuse to learn how to use pytorch&#39;s dataloader it confused me once 4 years ago and I took it personally.</span>
+<span class="sd">    Note: Yes the batch size is non standard but idk divisible by 60k is nice</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">accuracies</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">samples</span> <span class="o">=</span> <span class="n">x_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">n_batches</span> <span class="o">=</span> <span class="n">samples</span> <span class="o">//</span> <span class="n">batch_size</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">epochs</span><span class="p">):</span>
+        <span class="n">perm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span> <span class="c1"># switch order every epoch generally good practice</span>
+        <span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_batches</span><span class="p">):</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x_train</span><span class="p">[</span><span class="n">perm</span><span class="p">[</span><span class="n">batch</span><span class="o">*</span><span class="n">batch_size</span><span class="p">:(</span><span class="n">batch</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">batch_size</span><span class="p">]]</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y_train</span><span class="p">[</span><span class="n">perm</span><span class="p">[</span><span class="n">batch</span><span class="o">*</span><span class="n">batch_size</span><span class="p">:(</span><span class="n">batch</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">batch_size</span><span class="p">]]</span>
+            <span class="k">for</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">optimizers</span><span class="p">:</span> <span class="n">opt</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+            <span class="n">pred</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">loss</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">cross_entropy</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+            <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">optimizers</span><span class="p">:</span> <span class="n">opt</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+        <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+            <span class="n">acc</span> <span class="o">=</span> <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">model</span><span class="p">(</span><span class="n">x_train</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="n">y_train</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+            <span class="n">accuracies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">acc</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">accuracies</span>
+
+
+<span class="n">standardModel</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">useSVD</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+<span class="n">opt</span> <span class="o">=</span> <span class="n">getOptimizers</span><span class="p">(</span><span class="n">standardModel</span><span class="p">)</span>
+<span class="n">standardAcc</span> <span class="o">=</span> <span class="n">minibatchTrain</span><span class="p">(</span><span class="n">standardModel</span><span class="p">,</span> <span class="n">opt</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">standardAcc</span><span class="p">))),</span> <span class="n">standardAcc</span><span class="p">)</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
+<pre>&lt;ipython-input-87-a8cb529a7372&gt;:7: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  self.U = Parameter(torch.tensor(householder(torch.rand(N,1))))
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">RuntimeError</span>                              Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-90-e4740d0666b2&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">     30</span> standardModel <span class="ansi-blue-fg">=</span> Model<span class="ansi-blue-fg">(</span>useSVD<span class="ansi-blue-fg">=</span><span class="ansi-green-fg">True</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">.</span>cuda<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">     31</span> opt <span class="ansi-blue-fg">=</span> getOptimizers<span class="ansi-blue-fg">(</span>standardModel<span class="ansi-blue-fg">)</span>
+<span class="ansi-green-fg">---&gt; 32</span><span class="ansi-red-fg"> </span>standardAcc <span class="ansi-blue-fg">=</span> minibatchTrain<span class="ansi-blue-fg">(</span>standardModel<span class="ansi-blue-fg">,</span> opt<span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">     33</span> plt<span class="ansi-blue-fg">.</span>plot<span class="ansi-blue-fg">(</span>list<span class="ansi-blue-fg">(</span>range<span class="ansi-blue-fg">(</span>len<span class="ansi-blue-fg">(</span>standardAcc<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">,</span> standardAcc<span class="ansi-blue-fg">)</span>
+
+<span class="ansi-green-fg">&lt;ipython-input-90-e4740d0666b2&gt;</span> in <span class="ansi-cyan-fg">minibatchTrain</span><span class="ansi-blue-fg">(model, optimizers, epochs, batch_size)</span>
+<span class="ansi-green-intense-fg ansi-bold">     18</span>             y <span class="ansi-blue-fg">=</span> y_train<span class="ansi-blue-fg">[</span>perm<span class="ansi-blue-fg">[</span>batch<span class="ansi-blue-fg">*</span>batch_size<span class="ansi-blue-fg">:</span><span class="ansi-blue-fg">(</span>batch<span class="ansi-blue-fg">+</span><span class="ansi-cyan-fg">1</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">*</span>batch_size<span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">]</span>
+<span class="ansi-green-intense-fg ansi-bold">     19</span>             <span class="ansi-green-fg">for</span> opt <span class="ansi-green-fg">in</span> optimizers<span class="ansi-blue-fg">:</span> opt<span class="ansi-blue-fg">.</span>zero_grad<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-fg">---&gt; 20</span><span class="ansi-red-fg">             </span>pred <span class="ansi-blue-fg">=</span> model<span class="ansi-blue-fg">(</span>x<span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">     21</span>             loss <span class="ansi-blue-fg">=</span> F<span class="ansi-blue-fg">.</span>cross_entropy<span class="ansi-blue-fg">(</span>pred<span class="ansi-blue-fg">,</span> y<span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">     22</span>             loss<span class="ansi-blue-fg">.</span>backward<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">)</span>
+
+<span class="ansi-green-fg">~/anaconda3/envs/cmsc/lib/python3.8/site-packages/torch/nn/modules/module.py</span> in <span class="ansi-cyan-fg">_call_impl</span><span class="ansi-blue-fg">(self, *input, **kwargs)</span>
+<span class="ansi-green-intense-fg ansi-bold">   1188</span>         if not (self._backward_hooks or self._forward_hooks or self._forward_pre_hooks or _global_backward_hooks
+<span class="ansi-green-intense-fg ansi-bold">   1189</span>                 or _global_forward_hooks or _global_forward_pre_hooks):
+<span class="ansi-green-fg">-&gt; 1190</span><span class="ansi-red-fg">             </span><span class="ansi-green-fg">return</span> forward_call<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">*</span>input<span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">**</span>kwargs<span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">   1191</span>         <span class="ansi-red-fg"># Do not call functions when jit is used</span>
+<span class="ansi-green-intense-fg ansi-bold">   1192</span>         full_backward_hooks<span class="ansi-blue-fg">,</span> non_full_backward_hooks <span class="ansi-blue-fg">=</span> <span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">]</span>
+
+<span class="ansi-green-fg">&lt;ipython-input-88-488a49aadc11&gt;</span> in <span class="ansi-cyan-fg">forward</span><span class="ansi-blue-fg">(self, x)</span>
+<span class="ansi-green-intense-fg ansi-bold">     12</span> 
+<span class="ansi-green-intense-fg ansi-bold">     13</span>     <span class="ansi-green-fg">def</span> forward<span class="ansi-blue-fg">(</span>self<span class="ansi-blue-fg">,</span> x<span class="ansi-blue-fg">:</span> Tensor<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">:</span>
+<span class="ansi-green-fg">---&gt; 14</span><span class="ansi-red-fg">         </span>x <span class="ansi-blue-fg">=</span> F<span class="ansi-blue-fg">.</span>relu<span class="ansi-blue-fg">(</span>self<span class="ansi-blue-fg">.</span>fc1<span class="ansi-blue-fg">(</span>x<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">     15</span>         x <span class="ansi-blue-fg">=</span> F<span class="ansi-blue-fg">.</span>relu<span class="ansi-blue-fg">(</span>self<span class="ansi-blue-fg">.</span>fc2<span class="ansi-blue-fg">(</span>x<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">     16</span>         <span class="ansi-green-fg">return</span> F<span class="ansi-blue-fg">.</span>softmax<span class="ansi-blue-fg">(</span>self<span class="ansi-blue-fg">.</span>fc3<span class="ansi-blue-fg">(</span>x<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">)</span>
+
+<span class="ansi-green-fg">~/anaconda3/envs/cmsc/lib/python3.8/site-packages/torch/nn/modules/module.py</span> in <span class="ansi-cyan-fg">_call_impl</span><span class="ansi-blue-fg">(self, *input, **kwargs)</span>
+<span class="ansi-green-intense-fg ansi-bold">   1188</span>         if not (self._backward_hooks or self._forward_hooks or self._forward_pre_hooks or _global_backward_hooks
+<span class="ansi-green-intense-fg ansi-bold">   1189</span>                 or _global_forward_hooks or _global_forward_pre_hooks):
+<span class="ansi-green-fg">-&gt; 1190</span><span class="ansi-red-fg">             </span><span class="ansi-green-fg">return</span> forward_call<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">*</span>input<span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">**</span>kwargs<span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">   1191</span>         <span class="ansi-red-fg"># Do not call functions when jit is used</span>
+<span class="ansi-green-intense-fg ansi-bold">   1192</span>         full_backward_hooks<span class="ansi-blue-fg">,</span> non_full_backward_hooks <span class="ansi-blue-fg">=</span> <span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">]</span>
+
+<span class="ansi-green-fg">&lt;ipython-input-87-a8cb529a7372&gt;</span> in <span class="ansi-cyan-fg">forward</span><span class="ansi-blue-fg">(self, x)</span>
+<span class="ansi-green-intense-fg ansi-bold">     34</span> 
+<span class="ansi-green-intense-fg ansi-bold">     35</span>     <span class="ansi-green-fg">def</span> forward<span class="ansi-blue-fg">(</span>self<span class="ansi-blue-fg">,</span> x<span class="ansi-blue-fg">:</span> Tensor<span class="ansi-blue-fg">)</span> <span class="ansi-blue-fg">-&gt;</span> Tensor<span class="ansi-blue-fg">:</span>
+<span class="ansi-green-fg">---&gt; 36</span><span class="ansi-red-fg">         </span><span class="ansi-green-fg">return</span> self<span class="ansi-blue-fg">.</span>V<span class="ansi-blue-fg">(</span>self<span class="ansi-blue-fg">.</span>U<span class="ansi-blue-fg">(</span>x<span class="ansi-blue-fg">.</span>T<span class="ansi-blue-fg">)</span> <span class="ansi-blue-fg">@</span> <span class="ansi-blue-fg">(</span>self<span class="ansi-blue-fg">.</span>singulars<span class="ansi-blue-fg">/</span>self<span class="ansi-blue-fg">.</span>singulars<span class="ansi-blue-fg">.</span>norm<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">)</span> <span class="ansi-blue-fg">*</span> self<span class="ansi-blue-fg">.</span>S<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">.</span>T<span class="ansi-blue-fg">)</span> <span class="ansi-blue-fg">+</span> self<span class="ansi-blue-fg">.</span>bias
+<span class="ansi-green-intense-fg ansi-bold">     37</span> 
+
+<span class="ansi-red-fg">RuntimeError</span>: mat1 and mat2 shapes cannot be multiplied (784x1000 and 128x784)</pre>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[70]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="mi">60_000</span><span class="o">/</span><span class="mi">100</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[70]:</div>
+
+
+
+
+<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
+<pre>600.0</pre>
+</div>
+
+</div>
+
+</div>
+
 </div>
 
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
