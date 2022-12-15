@@ -36,7 +36,6 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 .highlight .m { color: var(--jp-mirror-editor-number-color) } /* Literal.Number */
 .highlight .s { color: var(--jp-mirror-editor-string-color) } /* Literal.String */
 .highlight .ow { color: var(--jp-mirror-editor-operator-color); font-weight: bold } /* Operator.Word */
-.highlight .pm { color: var(--jp-mirror-editor-punctuation-color) } /* Punctuation.Marker */
 .highlight .w { color: var(--jp-mirror-editor-variable-color) } /* Text.Whitespace */
 .highlight .mb { color: var(--jp-mirror-editor-number-color) } /* Literal.Number.Bin */
 .highlight .mf { color: var(--jp-mirror-editor-number-color) } /* Literal.Number.Float */
@@ -14465,10 +14464,6 @@ a.anchor-link {
   display: none;
 }
 
-.highlight  {
-  margin: 0.4em;
-}
-
 /* Input area styling */
 .jp-InputArea {
   overflow: hidden;
@@ -14478,9 +14473,26 @@ a.anchor-link {
   overflow: hidden;
 }
 
-.CodeMirror pre {
+.CodeMirror.cm-s-jupyter .highlight pre {
+/* weird, but --jp-code-padding defined to be 5px but 4px horizontal padding is hardcoded for pre.CodeMirror-line */
+  padding: var(--jp-code-padding) 4px;
   margin: 0;
-  padding: 0;
+
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+
+}
+
+.jp-OutputArea-output pre {
+  line-height: inherit;
+  font-family: inherit;
+}
+
+.jp-RenderedText pre {
+  color: var(--jp-content-font-color1);
+  font-size: var(--jp-code-font-size);
 }
 
 /* Using table instead of flexbox so that we can use break-inside property */
@@ -14526,6 +14538,10 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
   display: none;
 }
 
+@page {
+    margin: 0.5in; /* Margin for each printed piece of paper */
+}
+
 @media print {
   .jp-Cell-inputWrapper,
   .jp-Cell-outputWrapper {
@@ -14560,12 +14576,12 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
                 },
                 displayAlign: 'center',
                 CommonHTML: {
-                    linebreaks: { 
-                    automatic: true 
+                    linebreaks: {
+                    automatic: true
                     }
                 }
             });
-        
+
             MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
         }
     }
@@ -14581,12 +14597,12 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <h3 id="Note:-Max-said-he-would-grade-this">Note: Max said he would grade this<a class="anchor-link" href="#Note:-Max-said-he-would-grade-this">&#182;</a></h3><h1 id="Optimal-grokking:-Exploring-TrueGrad-Adam-implementations-and-normalized-singular-values">Optimal grokking: Exploring TrueGrad Adam implementations and normalized singular values<a class="anchor-link" href="#Optimal-grokking:-Exploring-TrueGrad-Adam-implementations-and-normalized-singular-values">&#182;</a></h1><h2 id="Introduction">Introduction<a class="anchor-link" href="#Introduction">&#182;</a></h2><p>What is grokking? <a href="https://arxiv.org/pdf/2201.02177.pdf">Grokking</a> is a curious phenomenon in neural networks. It in some sense spits in the face of classic understanding of training models. Rather than describe it, as they say, a picture is worth 1,000 words.</p>
-<p>&lt;/br&gt;</p>
-<p><img src="./grokking.png" alt=""></p>
+</br>
+<p><img src="./grokking.png" alt="" /></p>
 <p>Taken from the research paper linked earlier, grokking is the behavior observed on some simple problems that long past overfitting, models almost suddenly generalize. And by long past overfitting, in this example we mean <em>long</em> past, nearly 4 orders of magnitude!</p>
-<h2 id="Its-not-actually-that-bad!">Its not actually that bad!<a class="anchor-link" href="#Its-not-actually-that-bad!">&#182;</a></h2><p>Okay, so 4 orders of magnitude seem completely untenable, but this was the worst case described in the paper. Lets talk about the problem discussed in the paper a bit.
-&lt;/br&gt;</p>
-<h3 id="So-what-is-the-problem-described-in-the-paper?-What-does-the-paper-do?">So what is the problem described in the paper? What does the paper do?<a class="anchor-link" href="#So-what-is-the-problem-described-in-the-paper?-What-does-the-paper-do?">&#182;</a></h3><h3 id="The-problem-(simplified)">The problem (simplified)<a class="anchor-link" href="#The-problem-(simplified)">&#182;</a></h3><p>Modular division &lt;/br&gt;</p>
+<h2 id="Its-not-actually-that-bad!">Its not actually that bad!<a class="anchor-link" href="#Its-not-actually-that-bad!">&#182;</a></h2><p>Okay, so 4 orders of magnitude seem completely untenable, but this was the worst case described in the paper. Lets talk about the problem discussed in the paper a bit.</p>
+</br>
+<h3 id="So-what-is-the-problem-described-in-the-paper?-What-does-the-paper-do?">So what is the problem described in the paper? What does the paper do?<a class="anchor-link" href="#So-what-is-the-problem-described-in-the-paper?-What-does-the-paper-do?">&#182;</a></h3><h3 id="The-problem-(simplified)">The problem (simplified)<a class="anchor-link" href="#The-problem-(simplified)">&#182;</a></h3><p>Modular division </br></p>
 <ul>
 <li>Choose some prime $P$, the paper chose $P=97$</li>
 <li>Generate all equations of the form $a+b \equiv c$ (mod $P)$<ul>
@@ -14613,10 +14629,10 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 </ul>
 </li>
 </ul>
-<h2 id="The-problem-actually-described-in-the-paper">The problem actually described in the paper<a class="anchor-link" href="#The-problem-actually-described-in-the-paper">&#182;</a></h2><p>The problem described above is a lemma of what the paper actually does. This section is not required to understand anything we did, but we would be remiss if we did not talk about the finer details of the paper. &lt;/br&gt;</p>
+<h2 id="The-problem-actually-described-in-the-paper">The problem actually described in the paper<a class="anchor-link" href="#The-problem-actually-described-in-the-paper">&#182;</a></h2><p>The problem described above is a lemma of what the paper actually does. This section is not required to understand anything we did, but we would be remiss if we did not talk about the finer details of the paper. </br></p>
 <ul>
 <li>Not just modular division<ul>
-<li>$a \circ b \equiv c$(mod $P$) </li>
+<li>$a \circ b \equiv c$(mod $P$)</li>
 <li>For the following ops<ul>
 <li>$a \circ b$ $ = a + b$ (mod $P$) for $0 \leq a,b \le P$</li>
 <li>$a \circ b$ $ = a- b$ (mod $P$) for $0 \leq a,b \le P$</li>
@@ -14635,7 +14651,7 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 </ul>
 </li>
 <li>This means every input was 5 tokens<ul>
-<li>"a", "op", "b", "=", "c"</li>
+<li>&quot;a&quot;, &quot;op&quot;, &quot;b&quot;, &quot;=&quot;, &quot;c&quot;</li>
 </ul>
 </li>
 <li>Generate all equations of this form for some specific op</li>
@@ -14654,9 +14670,9 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 </li>
 <li>They also put outliers in the dataset to see how this effected grokking</li>
 </ul>
-<p>Importantly this reperesents a more full scope of what the study did. &lt;/br&gt;
+<p>Importantly this reperesents a more full scope of what the study did. </br>
 For our purposes we will just take some of their better presets as a base model.</p>
-<h2 id="Results-figure">Results figure<a class="anchor-link" href="#Results-figure">&#182;</a></h2><p><img src="./grokkingResults.png" alt=""></p>
+<h2 id="Results-figure">Results figure<a class="anchor-link" href="#Results-figure">&#182;</a></h2><p><img src="./grokkingResults.png" alt="" /></p>
 <ul>
 <li>Yes this is the worst graph in terms of labeling ever</li>
 <li>No the figure explanation does not help</li>
@@ -14675,7 +14691,7 @@ For our purposes we will just take some of their better presets as a base model.
 </ul>
 <h2 id="What-we-took-from-this-as-our-base-model">What we took from this as our base model<a class="anchor-link" href="#What-we-took-from-this-as-our-base-model">&#182;</a></h2><ul>
 <li>The transformer model with dropout</li>
-<li>Adam optimizer <ul>
+<li>Adam optimizer<ul>
 <li>$lr = 3e-4$</li>
 <li>$weightDecay = 1e-2$</li>
 <li>$B_1 = 0.9$, $B_2=0.98$</li>
@@ -14686,7 +14702,7 @@ For our purposes we will just take some of their better presets as a base model.
 <p>Essentially this represented their best presets minus minibatching which preformed significantly better in their training.</p>
 <h3 id="Why-didn't-we-do-minibatching?">Why didn't we do minibatching?<a class="anchor-link" href="#Why-didn't-we-do-minibatching?">&#182;</a></h3><ul>
 <li>We believe on intuition that TrueGrad Adam should be much more stable</li>
-<li>The best way to show this is to use the "worst" case for the optimizer</li>
+<li>The best way to show this is to use the &quot;worst&quot; case for the optimizer</li>
 <li>Still good presets for Adam, but a hard situation</li>
 </ul>
 <h2 id="Paper-Implementation">Paper Implementation<a class="anchor-link" href="#Paper-Implementation">&#182;</a></h2>
@@ -14707,10 +14723,9 @@ For our purposes we will just take some of their better presets as a base model.
 <li><a href="https://github.com/ClashLuke/TrueGrad">TrueGrad</a></li>
 <li><a href="https://github.com/AlexanderMath/fasth">fasth</a></li>
 <li><a href="https://github.com/pandas-dev/pandas">pandas</a></li>
-<li><a href="https://matplotlib.org/">matplotlib</a>
-#### All neccessary imports for paper re-implementation and analysis</li>
+<li><a href="https://matplotlib.org/">matplotlib</a></li>
 </ul>
-
+<h4 id="All-neccessary-imports-for-paper-re-implementation-and-analysis">All neccessary imports for paper re-implementation and analysis<a class="anchor-link" href="#All-neccessary-imports-for-paper-re-implementation-and-analysis">&#182;</a></h4>
 </div>
 </div>
 </div>
@@ -14719,7 +14734,7 @@ For our purposes we will just take some of their better presets as a base model.
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[11]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[1]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -14754,7 +14769,7 @@ For our purposes we will just take some of their better presets as a base model.
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[3]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[2]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">P</span> <span class="o">=</span> <span class="mi">97</span>
@@ -14778,8 +14793,10 @@ For our purposes we will just take some of their better presets as a base model.
 <ul>
 <li>$x \in x_{train}$ x = [10, 17, 0]</li>
 <li>corresponding y = [10, 17, (10 + 17) % p ]</li>
-<li>Essentially x is just y without the answer
-We split the data into training and validation to the specified amount of training data.</li>
+<li>Essentially x is just y without the answer</li>
+</ul>
+<p>We split the data into training and validation to the specified amount of training data.</p>
+<ul>
 <li>$x_{train}, y_{train}$ are shape (n_training_data, 3)</li>
 <li>$x_{test}, y_{test}$ are shape ($P*P$ - n_training_data, 3)</li>
 </ul>
@@ -14792,7 +14809,7 @@ We split the data into training and validation to the specified amount of traini
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[4]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[3]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">gen_data</span><span class="p">(</span><span class="n">n_training_data</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">device</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;cuda&quot;</span><span class="p">):</span>
@@ -14811,10 +14828,10 @@ We split the data into training and validation to the specified amount of traini
     <span class="n">output_seq</span> <span class="o">=</span> <span class="n">input_seq</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="n">input_seq</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># don&#39;t include answers</span>
 
-    <span class="n">train_x</span> <span class="o">=</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">input_seq</span><span class="p">[</span><span class="n">train_indices</span><span class="p">])</span><span class="o">.</span><span class="n">long</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
-    <span class="n">train_y</span> <span class="o">=</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">output_seq</span><span class="p">[</span><span class="n">train_indices</span><span class="p">])</span><span class="o">.</span><span class="n">long</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
-    <span class="n">valid_x</span> <span class="o">=</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">input_seq</span><span class="p">[</span><span class="n">valid_indices</span><span class="p">])</span><span class="o">.</span><span class="n">long</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
-    <span class="n">valid_y</span> <span class="o">=</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">output_seq</span><span class="p">[</span><span class="n">valid_indices</span><span class="p">])</span><span class="o">.</span><span class="n">long</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+    <span class="n">train_x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">input_seq</span><span class="p">[</span><span class="n">train_indices</span><span class="p">])</span><span class="o">.</span><span class="n">long</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+    <span class="n">train_y</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">output_seq</span><span class="p">[</span><span class="n">train_indices</span><span class="p">])</span><span class="o">.</span><span class="n">long</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+    <span class="n">valid_x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">input_seq</span><span class="p">[</span><span class="n">valid_indices</span><span class="p">])</span><span class="o">.</span><span class="n">long</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+    <span class="n">valid_y</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">output_seq</span><span class="p">[</span><span class="n">valid_indices</span><span class="p">])</span><span class="o">.</span><span class="n">long</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="p">(</span><span class="n">train_x</span><span class="p">,</span> <span class="n">train_y</span><span class="p">),</span> <span class="p">(</span><span class="n">valid_x</span><span class="p">,</span> <span class="n">valid_y</span><span class="p">)</span>
 </pre></div>
@@ -14842,7 +14859,7 @@ We split the data into training and validation to the specified amount of traini
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[5]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[4]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">EmbeddingWithPE</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Embedding</span><span class="p">):</span>
@@ -14896,7 +14913,7 @@ The paper stipulated a standard decoder so this is what we built, this includes 
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[6]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[5]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Transformer</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
@@ -14950,7 +14967,7 @@ The paper stipulated a standard decoder so this is what we built, this includes 
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[7]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[6]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">simple_train</span><span class="p">(</span>
@@ -15025,15 +15042,15 @@ The paper stipulated a standard decoder so this is what we built, this includes 
 <li>N_epochs = 15,000</li>
 <li>n_training_data = 800 + 100k $k \in \mathbb{Z}^{0 \le 12}$</li>
 <li>d_model = [64, 128, 256]</li>
-<li>dim_feedforward = [256, 512, 1024, 2048]
-&lt;/br&gt;</li>
+<li>dim_feedforward = [256, 512, 1024, 2048]</li>
 </ul>
+</br>
 <p>This took 1.5 <em>days</em> of compute on an rtx 2060 12GB.
 We save all fully trained models to do later analysis on their singular values as well the train and validation losses and accuracies.</p>
 <p>The naming scheme for the saved files is</p>
 <ul>
 <li>.csv or .model depending on if its the model state dict or the training accuracies losses etcetera</li>
-<li>\&lt;n_training<em>data&gt;</em>\&lt;d<em>model&gt;</em>\&lt;dim_feedforward&gt;</li>
+<li>&lt;n_training_data&gt;<em>&lt;d_model&gt;</em>&lt;dim_feedforward&gt;</li>
 <li>To not confuse anyone from earlier d_model is the same as width from the paper</li>
 </ul>
 
@@ -15045,7 +15062,7 @@ We save all fully trained models to do later analysis on their singular values a
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[8]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[7]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># For the sake of not running this biaccident we put this behind a function</span>
@@ -15061,7 +15078,7 @@ We save all fully trained models to do later analysis on their singular values a
                 <span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span>
                     <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span>
                     <span class="n">lr</span><span class="o">=</span><span class="mf">3e-4</span><span class="p">,</span>
-                    <span class="n">betas</span><span class="o">=</span><span class="p">[</span><span class="mf">.9</span><span class="p">,</span> <span class="mf">.98</span><span class="p">],</span>
+                    <span class="n">betas</span><span class="o">=</span><span class="p">[</span><span class="o">.</span><span class="mi">9</span><span class="p">,</span> <span class="o">.</span><span class="mi">98</span><span class="p">],</span>
                     <span class="n">weight_decay</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">,</span>
                     <span class="n">eps</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">,</span>
                     <span class="n">amsgrad</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -15088,9 +15105,9 @@ We save all fully trained models to do later analysis on their singular values a
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <h3 id="Analysis-of-accuracies">Analysis of accuracies<a class="anchor-link" href="#Analysis-of-accuracies">&#182;</a></h3><p>First lets make a series plots as follows where &lt;&gt; denotes an immutable parameter</p>
 <ul>
-<li>(training_data, \&lt;d_model=64&gt;, dim_feedforward)</li>
-<li>(training_data, \&lt;d_model=128&gt;, dim_feedforward)</li>
-<li>(training_data, \&lt;d_model=256&gt;, dim_feedforward)</li>
+<li>(training_data, &lt;d_model=64&gt;, dim_feedforward)</li>
+<li>(training_data, &lt;d_model=128&gt;, dim_feedforward)</li>
+<li>(training_data, &lt;d_model=256&gt;, dim_feedforward)</li>
 </ul>
 <p>So each set of plots is 13 by 4 and we can visually examine them before doing any statisical testing</p>
 
@@ -15135,9 +15152,7 @@ We save all fully trained models to do later analysis on their singular values a
 
 
 <div class="jp-OutputArea jp-Cell-outputArea">
-
 <div class="jp-OutputArea-child">
-
     
     <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 
@@ -15165,10 +15180,121 @@ jp-needs-light-background
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h3 id="So-we-have-a-base-model">So we have a base model<a class="anchor-link" href="#So-we-have-a-base-model">&#182;</a></h3><ul>
+<li>Roughly matches the paper</li>
+<li>Can we do better?</li>
+</ul>
+<h3 id="We-mentioned-two-methods">We mentioned two methods<a class="anchor-link" href="#We-mentioned-two-methods">&#182;</a></h3><ul>
+<li>TrueGrad adam</li>
+<li>Enforcing rules on the singular values</li>
+</ul>
+<h3 id="Lets-first-explore-singular-values">Lets first explore singular values<a class="anchor-link" href="#Lets-first-explore-singular-values">&#182;</a></h3><ul>
+<li>Relevant to the paper was that the model didn't seem to &quot;grok&quot; until the singular values became small</li>
+<li>Can we enforce this somehow?<ul>
+<li>Is this idea new?</li>
+<li>No idea is new...</li>
+</ul>
+</li>
+</ul>
+<h3 id="Relevant-lit.">Relevant lit.<a class="anchor-link" href="#Relevant-lit.">&#182;</a></h3><h4 id="Paper-1">Paper 1<a class="anchor-link" href="#Paper-1">&#182;</a></h4><ul>
+<li>This <a href="https://arxiv.org/pdf/1611.06013.pdf">paper</a> put a hard bound on singular values keeping them near 1<ul>
+<li>This preformed reasonably well</li>
+<li>But they have a problem! They have to somewhat regularly compute an svd composition to enforce the rules on their weight matrix!<ul>
+<li>This is extremely expensive!</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="Paper-2">Paper 2<a class="anchor-link" href="#Paper-2">&#182;</a></h4><ul>
+<li>Another <a href="https://www.microsoft.com/en-us/research/wp-content/uploads/2013/01/svd_v2.pdf">paper</a> use the svd to improve sparcity for generalization<ul>
+<li>This is (no pun) in some sense orthogonal to what we are doing, but an easily transferable task worth mentioning</li>
+</ul>
+</li>
+<li>There actually isn't a ton of relevant literature on enforcing singular values (although there is a lot of research on orthogonal matrices and CNN's)<ul>
+<li>Why is this though?</li>
+<li>We like to believe it is because methods involved computing the svd of the weights</li>
+<li>this is prohibitively expensive</li>
+</ul>
+</li>
+</ul>
+<h4 id="Paper-3">Paper 3<a class="anchor-link" href="#Paper-3">&#182;</a></h4><ul>
+<li>But there is one very interesting paper!</li>
+<li>This beautiful <a href="https://arxiv.org/pdf/2009.13977.pdf">paper</a> which recieved a neurips spotlight proposed SVD neural networks</li>
+<li>Essentially they represented each weight as its SVD decompositions ($U$, $S$, $V$) and trained them<ul>
+<li>This would be nice... but U and V must be orthogonal for this to make any sense<ul>
+<li>Regularization on gradient descent isn't enough!</li>
+<li>We need math!</li>
+</ul>
+</li>
+<li>They represent $U$ and $V$ as a product of house holder matrices!<ul>
+<li>A householder matrix is a special orthogonal matrix which <em>stays orthogonal on gradient descent!!!!</em></li>
+<li>Limitations<ul>
+<li>$U$ $S$ $V$ doesn't necessarily span the most useful space when $U$ and $V$ must be householder matrices</li>
+</ul>
+</li>
+<li>Solution!<ul>
+<li>Any orthogonal matrix $A \in R^{(N, N)}$ can be represented by $N$ house holder matrices</li>
+</ul>
+</li>
+<li>Limitation of solution<ul>
+<li>Oh my god that turns the first layer of mnist into a minium of 784 matrix multiplications</li>
+</ul>
+</li>
+<li>They wrote the library mentioned at the top <a href="https://github.com/AlexanderMath/fasth">fasth</a> which does the math much faster</li>
+<li>Still not ideal</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="Proposed-ideas">Proposed ideas<a class="anchor-link" href="#Proposed-ideas">&#182;</a></h3><ul>
+<li>Okay we have some reasons to believe we might be able to accomplish the task</li>
+<li>Lets implement something things and test our assumptions</li>
+</ul>
 
 </div>
 </div>
 </div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h3 id="Using-householder-matrices-on-mnist">Using householder matrices on mnist<a class="anchor-link" href="#Using-householder-matrices-on-mnist">&#182;</a></h3><ul>
+<li>Mnist is great because its very learnable</li>
+</ul>
+<h4 id="Key-limitation-of-householder">Key limitation of householder<a class="anchor-link" href="#Key-limitation-of-householder">&#182;</a></h4><ul>
+<li>You can <em>not</em> use momentum optimizers</li>
+<li>Householder matrices hold their properties on $SGD$ but non linear operators on the gradient break the properties</li>
+</ul>
+<h4 id="Householder-defintion">Householder defintion<a class="anchor-link" href="#Householder-defintion">&#182;</a></h4>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[10]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">householder</span><span class="p">(</span><span class="n">vector</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">):</span>
+    <span class="c1"># assert column vector, just a good sanity check</span>
+    <span class="k">assert</span> <span class="n">vector</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">vector</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span>
+    <span class="n">I</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">vector</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">I</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">vector</span><span class="nd">@vector</span><span class="o">.</span><span class="n">T</span><span class="o">/</span><span class="p">(</span><span class="n">vector</span><span class="o">.</span><span class="n">T</span><span class="nd">@vector</span><span class="p">)</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
