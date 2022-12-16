@@ -15319,6 +15319,13 @@ jp-needs-light-background
 </ul>
 </li>
 </ul>
+<h4 id="What-the-hell-is-setHouseOrthNHouseHolders!!!">What the hell is setHouseOrthNHouseHolders!!!<a class="anchor-link" href="#What-the-hell-is-setHouseOrthNHouseHolders!!!">&#182;</a></h4><ul>
+<li>Why I'm glad you asked</li>
+<li>For reasons well beyond me I can't properly segment the parameters when using a parameter list</li>
+<li>So I write a function that outputs the houseOrth as a string with the right number of parameters</li>
+<li>We can then call exec on that object to set the number of house holder matrices</li>
+<li>I'm as upset as you are about this</li>
+</ul>
 
 </div>
 </div>
@@ -15328,45 +15335,80 @@ jp-needs-light-background
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[87]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[446]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">from</span> <span class="nn">torch.nn</span> <span class="kn">import</span> <span class="n">init</span>
+<span class="c1">#from torch import device, dtype</span>
+<span class="c1"># A major todo is to verify this preserves the singular values </span>
+<span class="c1"># It doesn&#39;t really change the &quot;hardness&quot; of the problem</span>
+<span class="c1"># But my math ability is questionable</span>
+<span class="c1"># V @ (S.T @ (U @ x.T))#</span>
 <span class="k">class</span> <span class="nc">HouseOrth</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">N</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">N</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">factory_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;device&#39;</span><span class="p">:</span> <span class="n">device</span><span class="p">,</span> <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="n">dtype</span><span class="p">}</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="c1"># random initialization... this could be improved</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">U</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">householder</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="mi">1</span><span class="p">))))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">U</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">householder</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">factory_kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">uniform_</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">N</span><span class="p">),</span> <span class="mi">1</span><span class="o">/</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">N</span><span class="p">))))</span>
+        
     <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">):</span>
-        <span class="c1">#print(f&quot; x: {x.shape}, self.U: {self.U.shape},&quot;)</span>
+        
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">U</span> <span class="o">@</span> <span class="n">x</span><span class="o">.</span><span class="n">T</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">U</span> <span class="o">@</span> <span class="n">x</span> <span class="c1"># I don&#39;t like transposition hell... hopefully this isn&#39;t a stability issue</span>
+<span class="k">def</span> <span class="nf">setHouseOrthNHouseHolders</span><span class="p">(</span><span class="n">n_householders</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Father forgive me for I hath sinned</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">u</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2">self.U</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> = Parameter(householder(torch.empty(N,1, **factory_kwargs).uniform_(-1/math.sqrt(N), 1/math.sqrt(N))))&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_householders</span><span class="p">)]</span>
+    <span class="n">u</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+    <span class="n">u</span> <span class="o">=</span> <span class="n">u</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="o">*</span><span class="mi">4</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">helper</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;self.U0 @ x.T&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;self.U</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> @ (</span><span class="si">{</span><span class="n">helper</span><span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span>
+
+    <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">class HouseOrth(torch.nn.Module):</span>
+<span class="s2">    def __init__(self, N: int, device=None, dtype=None):</span>
+<span class="s2">        factory_kwargs = </span><span class="se">{{</span><span class="s2">&#39;device&#39;: device, &#39;dtype&#39;: dtype</span><span class="se">}}</span><span class="s2"></span>
+<span class="s2">        super().__init__()</span>
+<span class="s2">        # random initialization... this could be improved</span>
+<span class="si">{</span><span class="n">u</span><span class="si">}</span><span class="s2"></span>
+<span class="s2">    def forward(self, x: Tensor):</span>
+<span class="s2">        </span>
+<span class="s2">        return </span><span class="si">{</span><span class="n">helper</span><span class="p">(</span><span class="n">n_householders</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="si">}</span><span class="s2"></span>
+<span class="s2">    &quot;&quot;&quot;</span>
+    
+
+    <span class="k">return</span> <span class="n">s</span>
+
 
 <span class="k">class</span> <span class="nc">LinearSVD</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_features</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">out_features</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">bias</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_features</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">out_features</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">bias</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">factory_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;device&#39;</span><span class="p">:</span> <span class="n">device</span><span class="p">,</span> <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="n">dtype</span><span class="p">}</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="n">N</span><span class="p">,</span><span class="n">M</span> <span class="o">=</span> <span class="n">in_features</span><span class="p">,</span> <span class="n">out_features</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">in_features</span> <span class="o">=</span> <span class="n">in_features</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">out_features</span> <span class="o">=</span> <span class="n">out_features</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">U</span> <span class="o">=</span> <span class="n">HouseOrth</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">U</span> <span class="o">=</span> <span class="n">HouseOrth</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="o">**</span><span class="n">factory_kwargs</span><span class="p">)</span>
         <span class="c1"># we normalize the singular values in the multiplication - smart initialization probably doesn&#39;t matter too much</span>
         <span class="c1"># and if it does we do not know what that would be</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">singulars</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">M</span><span class="p">)</span><span class="o">.</span><span class="n">uniform_</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">out_features</span><span class="p">),</span> <span class="mi">1</span><span class="o">/</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">in_features</span><span class="p">)))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">M</span><span class="p">))</span> <span class="c1"># singulars are trainable - the matrix isn&#39;t (only the diagonal are parameters)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">V</span> <span class="o">=</span> <span class="n">HouseOrth</span><span class="p">(</span><span class="n">M</span><span class="p">)</span> <span class="c1"># Whether or not this is transposed doesn&#39;t really matter - its valid either way just a diff matrix</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">singulars</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="o">**</span><span class="n">factory_kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">uniform_</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">out_features</span><span class="p">),</span> <span class="mi">1</span><span class="o">/</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">in_features</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">M</span><span class="p">,</span> <span class="o">**</span><span class="n">factory_kwargs</span><span class="p">))</span> <span class="c1"># singulars are trainable - the matrix isn&#39;t (only the diagonal are parameters)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">V</span> <span class="o">=</span> <span class="n">HouseOrth</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="o">**</span><span class="n">factory_kwargs</span><span class="p">)</span> <span class="c1"># Whether or not this is transposed doesn&#39;t really matter - its valid either way just a diff matrix</span>
         <span class="c1"># copy torch.nn.Linear for what its worth here</span>
         <span class="k">if</span> <span class="n">bias</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">bias</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">out_features</span><span class="p">,))</span>
-            <span class="n">step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">U</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">singulars</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">S</span><span class="p">)</span>
-            <span class="n">fan_in</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">init</span><span class="o">.</span><span class="n">_calculate_fan_in_and_fan_out</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">V</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">U</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">singulars</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">S</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bias</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">out_features</span><span class="p">,),</span> <span class="o">**</span><span class="n">factory_kwargs</span><span class="p">)</span> <span class="p">)</span>
+            <span class="c1">#step = self.U()</span>
+            <span class="n">fan_in</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">init</span><span class="o">.</span><span class="n">_calculate_fan_in_and_fan_out</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">V</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">U</span><span class="p">(</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">singulars</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">S</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">)))</span>
             <span class="n">bound</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">fan_in</span><span class="p">)</span> <span class="k">if</span> <span class="n">fan_in</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span>
             <span class="n">init</span><span class="o">.</span><span class="n">uniform_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bias</span><span class="p">,</span> <span class="o">-</span><span class="n">bound</span><span class="p">,</span> <span class="n">bound</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">register_parameter</span><span class="p">(</span><span class="s1">&#39;bias&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">V</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">U</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">T</span><span class="p">)</span> <span class="o">@</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">singulars</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">singulars</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">S</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">bias</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">V</span><span class="p">(</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">singulars</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">singulars</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">S</span><span class="p">)</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">U</span><span class="p">(</span><span class="n">x</span><span class="p">))</span><span class="o">.</span><span class="n">T</span> <span class="p">)</span><span class="o">.</span><span class="n">T</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">bias</span>
     
 </pre></div>
 
@@ -15394,12 +15436,12 @@ jp-needs-light-background
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[40]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[447]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow.keras.datasets.mnist</span> <span class="k">as</span> <span class="nn">mnist</span>
 <span class="p">(</span><span class="n">x_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">),</span> <span class="p">(</span><span class="n">x_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span> <span class="o">=</span> <span class="n">mnist</span><span class="o">.</span><span class="n">load_data</span><span class="p">()</span>
-<span class="n">x_train</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">x_train</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">x_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">math</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">x_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+<span class="n">x_train</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">x_train</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">x_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">math</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">x_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="c1">#/ 255 # normalize b/c uh this is prolly smart?</span>
 <span class="n">y_train</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">y_train</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
 
 <span class="n">x_test</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">x_test</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">x_test</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">math</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">x_test</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
@@ -15416,13 +15458,12 @@ jp-needs-light-background
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[88]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[448]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Model</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">useSVD</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="c1"># to compare how bad this does</span>
         <span class="k">if</span> <span class="n">useSVD</span><span class="p">:</span>
             <span class="n">Linear</span> <span class="o">=</span> <span class="n">LinearSVD</span>
         <span class="k">else</span><span class="p">:</span>
@@ -15434,7 +15475,7 @@ jp-needs-light-background
     <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">):</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fc1</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fc2</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fc3</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fc3</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
 
      </div>
@@ -15466,7 +15507,7 @@ jp-needs-light-background
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[89]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[449]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">segmentHouseHolderParameters</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
@@ -15478,6 +15519,8 @@ jp-needs-light-background
     <span class="n">otherParams</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">module</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">modules</span><span class="p">():</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">HouseOrth</span><span class="p">):</span>
+            <span class="c1"># parameter lists... needs to be true apparently... honest to god not sure why</span>
+            <span class="c1"># but since HouseOrth is a base module it doesn&#39;t cause errors</span>
             <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">module</span><span class="o">.</span><span class="n">parameters</span><span class="p">(</span><span class="kc">False</span><span class="p">):</span> <span class="n">houseParams</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">module</span><span class="o">.</span><span class="n">parameters</span><span class="p">(</span><span class="kc">False</span><span class="p">):</span> <span class="n">otherParams</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
@@ -15502,12 +15545,12 @@ jp-needs-light-background
 </div>
 </div>
 
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[90]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[450]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">minibatchTrain</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span> <span class="n">optimizers</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Optimizer</span><span class="p">],</span> <span class="n">epochs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tensor</span><span class="p">]:</span>
@@ -15537,12 +15580,6 @@ jp-needs-light-background
             <span class="n">acc</span> <span class="o">=</span> <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">model</span><span class="p">(</span><span class="n">x_train</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="n">y_train</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
             <span class="n">accuracies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">acc</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span>
     <span class="k">return</span> <span class="n">accuracies</span>
-
-
-<span class="n">standardModel</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">useSVD</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
-<span class="n">opt</span> <span class="o">=</span> <span class="n">getOptimizers</span><span class="p">(</span><span class="n">standardModel</span><span class="p">)</span>
-<span class="n">standardAcc</span> <span class="o">=</span> <span class="n">minibatchTrain</span><span class="p">(</span><span class="n">standardModel</span><span class="p">,</span> <span class="n">opt</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">standardAcc</span><span class="p">))),</span> <span class="n">standardAcc</span><span class="p">)</span>
 </pre></div>
 
      </div>
@@ -15550,78 +15587,107 @@ jp-needs-light-background
 </div>
 </div>
 
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[451]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># normal linear model</span>
+<span class="n">standardModel</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">useSVD</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+<span class="n">standardOpt</span> <span class="o">=</span> <span class="n">getOptimizers</span><span class="p">(</span><span class="n">standardModel</span><span class="p">)</span>
+<span class="n">standardAcc</span> <span class="o">=</span> <span class="n">minibatchTrain</span><span class="p">(</span><span class="n">standardModel</span><span class="p">,</span> <span class="n">standardOpt</span><span class="p">)</span>
+</pre></div>
 
-
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-    
-    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-
-
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
-<pre>&lt;ipython-input-87-a8cb529a7372&gt;:7: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
-  self.U = Parameter(torch.tensor(householder(torch.rand(N,1))))
-</pre>
+     </div>
 </div>
-</div>
-<div class="jp-OutputArea-child">
-    
-    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-
-
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
-<pre>
-<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
-<span class="ansi-red-fg">RuntimeError</span>                              Traceback (most recent call last)
-<span class="ansi-green-fg">&lt;ipython-input-90-e4740d0666b2&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
-<span class="ansi-green-intense-fg ansi-bold">     30</span> standardModel <span class="ansi-blue-fg">=</span> Model<span class="ansi-blue-fg">(</span>useSVD<span class="ansi-blue-fg">=</span><span class="ansi-green-fg">True</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">.</span>cuda<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">     31</span> opt <span class="ansi-blue-fg">=</span> getOptimizers<span class="ansi-blue-fg">(</span>standardModel<span class="ansi-blue-fg">)</span>
-<span class="ansi-green-fg">---&gt; 32</span><span class="ansi-red-fg"> </span>standardAcc <span class="ansi-blue-fg">=</span> minibatchTrain<span class="ansi-blue-fg">(</span>standardModel<span class="ansi-blue-fg">,</span> opt<span class="ansi-blue-fg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">     33</span> plt<span class="ansi-blue-fg">.</span>plot<span class="ansi-blue-fg">(</span>list<span class="ansi-blue-fg">(</span>range<span class="ansi-blue-fg">(</span>len<span class="ansi-blue-fg">(</span>standardAcc<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">,</span> standardAcc<span class="ansi-blue-fg">)</span>
-
-<span class="ansi-green-fg">&lt;ipython-input-90-e4740d0666b2&gt;</span> in <span class="ansi-cyan-fg">minibatchTrain</span><span class="ansi-blue-fg">(model, optimizers, epochs, batch_size)</span>
-<span class="ansi-green-intense-fg ansi-bold">     18</span>             y <span class="ansi-blue-fg">=</span> y_train<span class="ansi-blue-fg">[</span>perm<span class="ansi-blue-fg">[</span>batch<span class="ansi-blue-fg">*</span>batch_size<span class="ansi-blue-fg">:</span><span class="ansi-blue-fg">(</span>batch<span class="ansi-blue-fg">+</span><span class="ansi-cyan-fg">1</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">*</span>batch_size<span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">]</span>
-<span class="ansi-green-intense-fg ansi-bold">     19</span>             <span class="ansi-green-fg">for</span> opt <span class="ansi-green-fg">in</span> optimizers<span class="ansi-blue-fg">:</span> opt<span class="ansi-blue-fg">.</span>zero_grad<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">)</span>
-<span class="ansi-green-fg">---&gt; 20</span><span class="ansi-red-fg">             </span>pred <span class="ansi-blue-fg">=</span> model<span class="ansi-blue-fg">(</span>x<span class="ansi-blue-fg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">     21</span>             loss <span class="ansi-blue-fg">=</span> F<span class="ansi-blue-fg">.</span>cross_entropy<span class="ansi-blue-fg">(</span>pred<span class="ansi-blue-fg">,</span> y<span class="ansi-blue-fg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">     22</span>             loss<span class="ansi-blue-fg">.</span>backward<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">)</span>
-
-<span class="ansi-green-fg">~/anaconda3/envs/cmsc/lib/python3.8/site-packages/torch/nn/modules/module.py</span> in <span class="ansi-cyan-fg">_call_impl</span><span class="ansi-blue-fg">(self, *input, **kwargs)</span>
-<span class="ansi-green-intense-fg ansi-bold">   1188</span>         if not (self._backward_hooks or self._forward_hooks or self._forward_pre_hooks or _global_backward_hooks
-<span class="ansi-green-intense-fg ansi-bold">   1189</span>                 or _global_forward_hooks or _global_forward_pre_hooks):
-<span class="ansi-green-fg">-&gt; 1190</span><span class="ansi-red-fg">             </span><span class="ansi-green-fg">return</span> forward_call<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">*</span>input<span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">**</span>kwargs<span class="ansi-blue-fg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">   1191</span>         <span class="ansi-red-fg"># Do not call functions when jit is used</span>
-<span class="ansi-green-intense-fg ansi-bold">   1192</span>         full_backward_hooks<span class="ansi-blue-fg">,</span> non_full_backward_hooks <span class="ansi-blue-fg">=</span> <span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">]</span>
-
-<span class="ansi-green-fg">&lt;ipython-input-88-488a49aadc11&gt;</span> in <span class="ansi-cyan-fg">forward</span><span class="ansi-blue-fg">(self, x)</span>
-<span class="ansi-green-intense-fg ansi-bold">     12</span> 
-<span class="ansi-green-intense-fg ansi-bold">     13</span>     <span class="ansi-green-fg">def</span> forward<span class="ansi-blue-fg">(</span>self<span class="ansi-blue-fg">,</span> x<span class="ansi-blue-fg">:</span> Tensor<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">:</span>
-<span class="ansi-green-fg">---&gt; 14</span><span class="ansi-red-fg">         </span>x <span class="ansi-blue-fg">=</span> F<span class="ansi-blue-fg">.</span>relu<span class="ansi-blue-fg">(</span>self<span class="ansi-blue-fg">.</span>fc1<span class="ansi-blue-fg">(</span>x<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">     15</span>         x <span class="ansi-blue-fg">=</span> F<span class="ansi-blue-fg">.</span>relu<span class="ansi-blue-fg">(</span>self<span class="ansi-blue-fg">.</span>fc2<span class="ansi-blue-fg">(</span>x<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">     16</span>         <span class="ansi-green-fg">return</span> F<span class="ansi-blue-fg">.</span>softmax<span class="ansi-blue-fg">(</span>self<span class="ansi-blue-fg">.</span>fc3<span class="ansi-blue-fg">(</span>x<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">)</span>
-
-<span class="ansi-green-fg">~/anaconda3/envs/cmsc/lib/python3.8/site-packages/torch/nn/modules/module.py</span> in <span class="ansi-cyan-fg">_call_impl</span><span class="ansi-blue-fg">(self, *input, **kwargs)</span>
-<span class="ansi-green-intense-fg ansi-bold">   1188</span>         if not (self._backward_hooks or self._forward_hooks or self._forward_pre_hooks or _global_backward_hooks
-<span class="ansi-green-intense-fg ansi-bold">   1189</span>                 or _global_forward_hooks or _global_forward_pre_hooks):
-<span class="ansi-green-fg">-&gt; 1190</span><span class="ansi-red-fg">             </span><span class="ansi-green-fg">return</span> forward_call<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">*</span>input<span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">**</span>kwargs<span class="ansi-blue-fg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">   1191</span>         <span class="ansi-red-fg"># Do not call functions when jit is used</span>
-<span class="ansi-green-intense-fg ansi-bold">   1192</span>         full_backward_hooks<span class="ansi-blue-fg">,</span> non_full_backward_hooks <span class="ansi-blue-fg">=</span> <span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">]</span>
-
-<span class="ansi-green-fg">&lt;ipython-input-87-a8cb529a7372&gt;</span> in <span class="ansi-cyan-fg">forward</span><span class="ansi-blue-fg">(self, x)</span>
-<span class="ansi-green-intense-fg ansi-bold">     34</span> 
-<span class="ansi-green-intense-fg ansi-bold">     35</span>     <span class="ansi-green-fg">def</span> forward<span class="ansi-blue-fg">(</span>self<span class="ansi-blue-fg">,</span> x<span class="ansi-blue-fg">:</span> Tensor<span class="ansi-blue-fg">)</span> <span class="ansi-blue-fg">-&gt;</span> Tensor<span class="ansi-blue-fg">:</span>
-<span class="ansi-green-fg">---&gt; 36</span><span class="ansi-red-fg">         </span><span class="ansi-green-fg">return</span> self<span class="ansi-blue-fg">.</span>V<span class="ansi-blue-fg">(</span>self<span class="ansi-blue-fg">.</span>U<span class="ansi-blue-fg">(</span>x<span class="ansi-blue-fg">.</span>T<span class="ansi-blue-fg">)</span> <span class="ansi-blue-fg">@</span> <span class="ansi-blue-fg">(</span>self<span class="ansi-blue-fg">.</span>singulars<span class="ansi-blue-fg">/</span>self<span class="ansi-blue-fg">.</span>singulars<span class="ansi-blue-fg">.</span>norm<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">)</span> <span class="ansi-blue-fg">*</span> self<span class="ansi-blue-fg">.</span>S<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">.</span>T<span class="ansi-blue-fg">)</span> <span class="ansi-blue-fg">+</span> self<span class="ansi-blue-fg">.</span>bias
-<span class="ansi-green-intense-fg ansi-bold">     37</span> 
-
-<span class="ansi-red-fg">RuntimeError</span>: mat1 and mat2 shapes cannot be multiplied (784x1000 and 128x784)</pre>
 </div>
 </div>
 
 </div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h4 id="Train-with-1-householder-matrix-for-each-orthogonal-matrix">Train with 1 householder matrix for each orthogonal matrix<a class="anchor-link" href="#Train-with-1-householder-matrix-for-each-orthogonal-matrix">&#182;</a></h4>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[452]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">s</span> <span class="o">=</span> <span class="n">setHouseOrthNHouseHolders</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">exec</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="c1"># yes this is insane</span>
+<span class="n">svdModel1</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">useSVD</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+<span class="n">svdOpt1</span> <span class="o">=</span> <span class="n">getOptimizers</span><span class="p">(</span><span class="n">svdModel1</span><span class="p">)</span>
+<span class="n">svdAcc1</span> <span class="o">=</span> <span class="n">minibatchTrain</span><span class="p">(</span><span class="n">svdModel1</span><span class="p">,</span> <span class="n">svdOpt1</span><span class="p">)</span>
+</pre></div>
 
+     </div>
+</div>
+</div>
+</div>
+
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h4 id="Train-with-20-householder-matrix-for-each-orthogonal-matrix">Train with 20 householder matrix for each orthogonal matrix<a class="anchor-link" href="#Train-with-20-householder-matrix-for-each-orthogonal-matrix">&#182;</a></h4>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[454]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># svd linear model</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">setHouseOrthNHouseHolders</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">exec</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="c1"># yes this is insane</span>
+<span class="n">svdModel20</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">useSVD</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+<span class="n">svdOpt20</span> <span class="o">=</span> <span class="n">getOptimizers</span><span class="p">(</span><span class="n">svdModel20</span><span class="p">)</span>
+<span class="n">svdAcc20</span> <span class="o">=</span> <span class="n">minibatchTrain</span><span class="p">(</span><span class="n">svdModel20</span><span class="p">,</span> <span class="n">svdOpt20</span><span class="p">)</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[456]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># svd linear model</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">setHouseOrthNHouseHolders</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span>
+<span class="n">exec</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="c1"># yes this is insane</span>
+<span class="n">svdModel60</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">useSVD</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+<span class="n">svdOpt60</span> <span class="o">=</span> <span class="n">getOptimizers</span><span class="p">(</span><span class="n">svdModel60</span><span class="p">)</span>
+<span class="n">svdAcc60</span> <span class="o">=</span> <span class="n">minibatchTrain</span><span class="p">(</span><span class="n">svdModel60</span><span class="p">,</span> <span class="n">svdOpt60</span><span class="p">)</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
 </div>
 
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
@@ -15629,10 +15695,17 @@ jp-needs-light-background
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[70]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[457]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="mi">60_000</span><span class="o">/</span><span class="mi">100</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+<span class="c1"># plotting</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">standardAcc</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">standardAcc</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Standard model&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">svdAcc1</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;SVD Model hh=1&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">svdAcc20</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;SVD Model hh=20&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">svdAcc60</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;SVD Model hh=60&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
 </pre></div>
 
      </div>
@@ -15648,13 +15721,29 @@ jp-needs-light-background
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[70]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[457]:</div>
 
 
 
 
 <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
-<pre>600.0</pre>
+<pre>&lt;matplotlib.legend.Legend at 0x7f5e6d672a30&gt;</pre>
+</div>
+
+</div>
+<div class="jp-OutputArea-child">
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+
+
+<div class="jp-RenderedImage jp-OutputArea-output ">
+<img src="data:image/png;base64,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WLhwIaeeeiqvv+5Ne/Cf//mfxNKVrKEwffp06urqBvz8X/7yl9x6661DVp7uvPTSS3z4wx8e9DrDIetOirrR9skteg70ungdE/Mmdixo2AWJZmk/F2IAXnvtNZ566ineeustgsEgdXV1pFIpwAv06667jkgfYysNF8dxME1zVPZ9PMq+QG+ffq6X4XPrE/XML5/fsaC6/YKiYZ0ZT4hhd/eTm9lyoGVItzl3ciF3/u28Hh+vqamhvLycYDAIQHl5OQD33nsvBw4c4IILLqC8vJxVq1bxuc99jjfffJN4PM5HP/pR7r77bsCred9www08+eSTWJbF7373O04++WTq6+tZvnw51dXVLFmyBK11Zr9XXHEF+/fvJ5FI8IUvfIGbb/Z6qOXn5/OZz3yG559/nvvuu4/t27fz/e9/n+LiYk455ZRMOTu766672L17N7t27WLfvn3cc889rFmzhmeeeYYpU6bw5JNP4vf7eeGFF/jqV7+KbduceeaZ3H///QSDQZ599lm++MUvEolEOPfcjivNo9Eot912G++88w6WZXHXXXdx+eXdzf8zMrKvyaWP6edc7dKYaKQ01Gmu0Op1EMiHcSeNRBGFyCkf/OAH2b9/P7Nnz+aWW25h9erVANx+++1MnjyZVatWsWrVKsBrmlm7di0bN25k9erVbNy4MbOd8vJy3nrrLT73uc/xgx/8AIC7776bc889l82bN3PllVeyb9++zPo///nPWbduHWvXruXee++lvt7rjhyNRjn77LPZsGEDJ5xwAnfeeSevvvoqr7zyClu2bOnxOHbu3MmLL77IypUrue6667jgggvYtGkT4XCYP/7xjyQSCW688UYeeeQRNm3ahG3b3H///SQSCT796U/z5JNPsm7dOg4ePJjZ5ve+9z0uvPBC3njjDVatWsXXvvY1otHo0P3xj1HW1dB1H23oTckmHO107bJYtRYmnwaGfDUT2a23mvRwyc/PZ926dfzlL39h1apVXH311fzLv/wLN95441Hr/va3v2XFihXYtk1NTQ1btmxh4cKFAFx11VUAnHHGGTz++OMAvPzyy5nfL730UkpKSjLbuvfee/n9738PwP79+9m+fTtlZWWYpslHPvIRAF5//XWWLVtG+4Q5V199Ne+99163x3HxxRfj9/tZsGABjuNw0UUXAbBgwQL27NnDtm3bmDFjBrNn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"
+class="
+jp-needs-light-background
+"
+>
 </div>
 
 </div>
@@ -15663,6 +15752,45 @@ jp-needs-light-background
 
 </div>
 
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h3 id="Oh-my-god-it-works!">Oh my god it works!<a class="anchor-link" href="#Oh-my-god-it-works!">&#182;</a></h3><ul>
+<li>I was not expecting that!</li>
+<li>The model performs better with more householder matrices repersenting each orthogonal matrix</li>
+<li>It learns slightly slower (and is less stable (analysis would take too long))<ul>
+<li>But it does nearly as well as the standard model!</li>
+</ul>
+</li>
+<li>We can now try to implement the actual problem</li>
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h3 id="Dear-god-we-have-to-implement-this">Dear god we have to implement this<a class="anchor-link" href="#Dear-god-we-have-to-implement-this">&#182;</a></h3><ul>
+<li>Implement a full transformer under the same rules as our fully connect network</li>
+<li>Making our lives less evil</li>
+<li>We will one hot encode the inputs so we don't have to implement an embedding layer<ul>
+<li>If you think this is cheating we are sorry, but this is an amount of time</li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+</div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
