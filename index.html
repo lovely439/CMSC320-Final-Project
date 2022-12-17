@@ -14596,13 +14596,13 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h3 id="Note:-Max-said-he-would-grade-this">Note: Max said he would grade this<a class="anchor-link" href="#Note:-Max-said-he-would-grade-this">&#182;</a></h3><h3 id="Members:-Eli-Lichtblau,-Muhammad-Azlan,-Asha-Nur">Members: Eli Lichtblau, Muhammad Azlan, Asha Nur<a class="anchor-link" href="#Members:-Eli-Lichtblau,-Muhammad-Azlan,-Asha-Nur">&#182;</a></h3><h1 id="Attempting-Optimal-grokking-through-singular-value-normalization">Attempting Optimal grokking through singular value normalization<a class="anchor-link" href="#Attempting-Optimal-grokking-through-singular-value-normalization">&#182;</a></h1><h2 id="Introduction">Introduction<a class="anchor-link" href="#Introduction">&#182;</a></h2><p>What is grokking? <a href="https://arxiv.org/pdf/2201.02177.pdf">Grokking</a> is a curious phenomenon in neural networks. It in some sense spits in the face of classic understanding of training models. Rather than describe it, as they say, a picture is worth 1,000 words.</p>
+<h5 id="Note:-Max-said-he-would-grade-this">Note: Max said he would grade this<a class="anchor-link" href="#Note:-Max-said-he-would-grade-this">&#182;</a></h5><h4 id="CMSC320-Fall-2022">CMSC320 Fall 2022<a class="anchor-link" href="#CMSC320-Fall-2022">&#182;</a></h4><h4 id="Members:-Eli-Lichtblau,-Muhammad-Azlan,-Asha-Nur">Members: Eli Lichtblau, Muhammad Azlan, Asha Nur<a class="anchor-link" href="#Members:-Eli-Lichtblau,-Muhammad-Azlan,-Asha-Nur">&#182;</a></h4><h1 id="Attempting-Optimal-grokking-through-singular-value-normalization">Attempting Optimal grokking through singular value normalization<a class="anchor-link" href="#Attempting-Optimal-grokking-through-singular-value-normalization">&#182;</a></h1><h2 id="Introduction">Introduction<a class="anchor-link" href="#Introduction">&#182;</a></h2><p>What is grokking? <a href="https://arxiv.org/pdf/2201.02177.pdf">Grokking</a> is a curious phenomenon in neural networks. In some sense, it spits in the face of classic understanding of training models. Rather than describe it, a picture is worth more than a 1,000 words.</p>
 </br>
 <p><img src="./grokking.png" alt="" /></p>
 <p>Taken from the research paper linked earlier, grokking is the behavior observed on some simple problems that long past overfitting, models almost suddenly generalize. And by long past overfitting, in this example we mean <em>long</em> past, nearly 4 orders of magnitude!</p>
-<h2 id="Its-not-actually-that-bad!">Its not actually that bad!<a class="anchor-link" href="#Its-not-actually-that-bad!">&#182;</a></h2><p>Okay, so 4 orders of magnitude seem completely untenable, but this was the worst case described in the paper. Lets talk about the problem discussed in the paper a bit.</p>
+<h3 id="It's-not-actually-that-bad!">It's not actually that bad!<a class="anchor-link" href="#It's-not-actually-that-bad!">&#182;</a></h3><p>4 orders of magnitude may seem completely untenable, but this was the worst case described in the paper. Let's talk more about the problem discussed in the paper in more detail.</p>
 </br>
-<h3 id="So-what-is-the-problem-described-in-the-paper?-What-does-the-paper-do?">So what is the problem described in the paper? What does the paper do?<a class="anchor-link" href="#So-what-is-the-problem-described-in-the-paper?-What-does-the-paper-do?">&#182;</a></h3><h3 id="The-problem-(simplified)">The problem (simplified)<a class="anchor-link" href="#The-problem-(simplified)">&#182;</a></h3><p>Modular division </br></p>
+<h3 id="So,-what's-the-problem-described-in-the-paper?-What-does-the-paper-do?">So, what's the problem described in the paper? What does the paper do?<a class="anchor-link" href="#So,-what's-the-problem-described-in-the-paper?-What-does-the-paper-do?">&#182;</a></h3><h3 id="The-problem-(simplified)">The problem (simplified)<a class="anchor-link" href="#The-problem-(simplified)">&#182;</a></h3><p>Modular division </br></p>
 <ul>
 <li>Choose some prime $P$, the paper chose $P=97$</li>
 <li>Generate all equations of the form $a+b \equiv c$ (mod $P)$<ul>
@@ -14629,7 +14629,7 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 </ul>
 </li>
 </ul>
-<h2 id="The-problem-actually-described-in-the-paper">The problem actually described in the paper<a class="anchor-link" href="#The-problem-actually-described-in-the-paper">&#182;</a></h2><p>The problem described above is a lemma of what the paper actually does. This section is not required to understand anything we did, but we would be remiss if we did not talk about the finer details of the paper. </br></p>
+<h3 id="The-problem-actually-described-in-the-paper">The problem actually described in the paper<a class="anchor-link" href="#The-problem-actually-described-in-the-paper">&#182;</a></h3><p>The problem described above is a lemma of what the paper actually does. This section is not required to understand anything we did, but we would be remiss if we did not talk about the finer details of the paper. </br></p>
 <ul>
 <li>Not just modular division<ul>
 <li>$a \circ b \equiv c$(mod $P$)</li>
@@ -14674,16 +14674,16 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 For our purposes we will just take some of their better presets as a base model.</p>
 <h2 id="Results-figure">Results figure<a class="anchor-link" href="#Results-figure">&#182;</a></h2><p><img src="./grokkingResults.png" alt="" /></p>
 <ul>
-<li>Yes this is the worst graph in terms of labeling ever</li>
-<li>No the figure explanation does not help</li>
-<li>Below we talk about the key findings of the paper mostly ignoring this graph</li>
+<li>Yes, this is the worst graph in terms of labeling ever!</li>
+<li>No, the figure explanation does not help!</li>
+<li>Below we talk about the key findings of the paper, mostly ignoring this graph</li>
 </ul>
 <h2 id="Key-Results">Key Results<a class="anchor-link" href="#Key-Results">&#182;</a></h2><ul>
 <li>Adam is seemingly very important to grokking, at least momentum optimizers</li>
 <li>Grokking didn't happen until the singular values of weights became small</li>
 <li>Minibatching is superior</li>
 <li>Weight decay is <em>extremely</em> <em>extremely</em> important</li>
-<li>They didn't give precise results as far as We could tell<ul>
+<li>They didn't give precise results as far as we could tell<ul>
 <li>No statement that is this problem, this training data split, N optimization steps to train, M optimizations steps to grok</li>
 <li>There exists some parameters such that grokking happens within an order of magnitude</li>
 </ul>
@@ -14700,8 +14700,8 @@ For our purposes we will just take some of their better presets as a base model.
 <li>Full batch training</li>
 </ul>
 <p>Essentially this represented their best presets minus minibatching which preformed significantly better in their training.</p>
-<h3 id="Why-didn't-we-do-minibatching?">Why didn't we do minibatching?<a class="anchor-link" href="#Why-didn't-we-do-minibatching?">&#182;</a></h3><ul>
-<li>Initally there was a plan to test the TrueGrad Adam implementation from below<ul>
+<h3 id="Why-do-we-not-do-minibatching?">Why do we not do minibatching?<a class="anchor-link" href="#Why-do-we-not-do-minibatching?">&#182;</a></h3><ul>
+<li>Initally, there was a plan to test the TrueGrad Adam implementation from below:<ul>
 <li>The implementation is currently broken and do the scope of the singular value implementation we did not have time to implement it</li>
 <li>Unfortunately do to compute time we are in some sense tied to this full batch training</li>
 <li>We chose it for the following reasons below</li>
@@ -14711,14 +14711,14 @@ For our purposes we will just take some of their better presets as a base model.
 <li>The best way to show this is to use the &quot;worst&quot; case for the optimizer</li>
 <li>Still good presets for Adam, but a hard situation</li>
 </ul>
-<h3 id="What-we-did">What we did<a class="anchor-link" href="#What-we-did">&#182;</a></h3><ul>
-<li>Below we will reimplement the paper but to set a scene for later - what are we trying to do?</li>
+<h3 id="What-is-our-plan?">What is our plan?<a class="anchor-link" href="#What-is-our-plan?">&#182;</a></h3><ul>
+<li>Below, we will reimplement the paper but to set a scene for later - what are we trying to do?</li>
 <li>The paper noted grokking did not happen until the singular values of the weight matrices became small</li>
 <li>We will implement weight matrices with a householder trick which allows us to enforce precise rules on the singular values directly.</li>
 <li>We first explore this implementation on mnist and then try to use it on the problem described in the paper</li>
 </ul>
 <h2 id="Paper-re-Implementation">Paper re-Implementation<a class="anchor-link" href="#Paper-re-Implementation">&#182;</a></h2><ul>
-<li>Before we can add anything to the research we must first reimplement the paper</li>
+<li>Before we can add anything to the research, we must first reimplement the paper</li>
 </ul>
 
 </div>
@@ -14805,7 +14805,7 @@ For our purposes we will just take some of their better presets as a base model.
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h3 id="Data-generation">Data generation<a class="anchor-link" href="#Data-generation">&#182;</a></h3><p>Unlike the paper we generate the smaller verison so. So our data looks as follows</p>
+<h3 id="Data-Generation">Data Generation<a class="anchor-link" href="#Data-Generation">&#182;</a></h3><p>Unlike the paper, we want to generate the smaller verison so. So our data looks as follows</p>
 <ul>
 <li>$x \in x_{train}$ x = [10, 17, 0]</li>
 <li>corresponding y = [10, 17, (10 + 17) % p ]</li>
@@ -14825,7 +14825,7 @@ For our purposes we will just take some of their better presets as a base model.
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[3]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[1]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">gen_data</span><span class="p">(</span><span class="n">n_training_data</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">device</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;cuda&quot;</span><span class="p">):</span>
@@ -14864,8 +14864,8 @@ For our purposes we will just take some of their better presets as a base model.
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h3 id="The-embedding-layer">The embedding layer<a class="anchor-link" href="#The-embedding-layer">&#182;</a></h3><p>Pytorch doesn't seem to have an embedding with position encoding built in yet. It might seem overkill to implement but transformers are permutation invariant which on a symmetric problem might give us an unfair advantage.</p>
-<p>Our implementation is standard or positional encoding - we used the <a href="https://machinelearningmastery.com/a-gentle-introduction-to-positional-encoding-in-transformer-models-part-1/">following</a> as reference</p>
+<h3 id="The-Embedding-Layer">The Embedding Layer<a class="anchor-link" href="#The-Embedding-Layer">&#182;</a></h3><p>Pytorch doesn't seem to have an embedding with position encoding built in yet. It might seem overkill to implement but transformers are permutation invariant which on a symmetric problem might give us an unfair advantage.</p>
+<p>Our implementation is standard or positional encoding - we used the <a href="https://machinelearningmastery.com/a-gentle-introduction-to-positional-encoding-in-transformer-models-part-1/">following</a> as reference:</p>
 
 </div>
 </div>
@@ -14917,9 +14917,9 @@ For our purposes we will just take some of their better presets as a base model.
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h3 id="The-Transformer-Model">The Transformer Model<a class="anchor-link" href="#The-Transformer-Model">&#182;</a></h3><p>Won't rehash the copying of the paper but will mention a few important things.
+<h3 id="The-Transformer-Model">The Transformer Model<a class="anchor-link" href="#The-Transformer-Model">&#182;</a></h3><p>We will not rehash the copying of the paper but we will mention a few important things.
 The paper stipulated a standard decoder so this is what we built, this includes masking and layernorms.</p>
-<p>Also important is a decoder of width N will have an output layer with N neurons. We are classifying a number that is at most P which is num_embeddings. So we add a layer such that the final layer has num_embedding $P$ outputs.</p>
+<p>Also another important note is a decoder of width N will have an output layer with N neurons. We are classifying a number that is at most P which is num_embeddings. So, we would add a layer such that the final layer has num_embedding $P$ outputs.</p>
 
 </div>
 </div>
@@ -14972,8 +14972,7 @@ The paper stipulated a standard decoder so this is what we built, this includes 
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h3 id="Training-the-model">Training the model<a class="anchor-link" href="#Training-the-model">&#182;</a></h3><p>Here we write a simple training loop to do full batch training of the model. We record the training losses and accuracie as well as the validation losses and accuracies.</p>
-<p>We use cross entropy because always use cross entropy.</p>
+<h3 id="Training-the-model">Training the model<a class="anchor-link" href="#Training-the-model">&#182;</a></h3><p>In this part, we write a simple training loop to do full batch training of the model. We record the training losses and accuracies as well as the validation losses and accuracies.</p>
 
 </div>
 </div>
@@ -15061,9 +15060,8 @@ The paper stipulated a standard decoder so this is what we built, this includes 
 <li>dim_feedforward = [256, 512, 1024, 2048]</li>
 </ul>
 </br>
-<p>This took 1.5 <em>days</em> of compute on an rtx 2060 12GB.
-We save all fully trained models to do later analysis on their singular values as well the train and validation losses and accuracies.</p>
-<p>The naming scheme for the saved files is</p>
+<p>This took 1.5 <em>days</em> of compute on an RTX 2060 12GB. We save all fully trained models to do later analysis on their singular values as well the train and validation losses and accuracies.</p>
+<p>The naming scheme for the saved files is:</p>
 <ul>
 <li>.csv or .model depending on if its the model state dict or the training accuracies losses etcetera</li>
 <li>&lt;n_training_data&gt;<em>&lt;d_model&gt;</em>&lt;dim_feedforward&gt;</li>
@@ -15121,7 +15119,7 @@ We save all fully trained models to do later analysis on their singular values a
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <h3 id="Analysis-of-accuracies">Analysis of accuracies<a class="anchor-link" href="#Analysis-of-accuracies">&#182;</a></h3><ul>
 <li>We have to do some form of hypothesis testing</li>
-<li>Spoiler alert we can't really do it later so we'll do some here</li>
+<li>Spoiler alert! We can't really do it later so we'll do some here</li>
 <li>We will plot all the 128_2048 models and just do some rudimentary analysis on grok time versus training data - we choose to analyze these models as this sized Transformer matches the paper</li>
 </ul>
 
@@ -15189,18 +15187,18 @@ jp-needs-light-background
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <h4 id="Full-batch-training-fun">Full batch training fun<a class="anchor-link" href="#Full-batch-training-fun">&#182;</a></h4><ul>
-<li>So this wouldn've been really interesting tohave if TrueGradAdam didn't have too many bugs<ul>
+<li>So, this wouldn've been really interesting tohave if TrueGradAdam didn't have too many bugs<ul>
 <li>Adam on full batch is very unstable in some sense as we can see random accuracy drops that are quickly recovered</li>
 </ul>
 </li>
 </ul>
 <h4 id="More-Data-groks-faster">More Data groks faster<a class="anchor-link" href="#More-Data-groks-faster">&#182;</a></h4><ul>
-<li>While our stability is terrible we very much match or exceed the paper in terms of accuracy reached on percent training data</li>
-<li>Also clearly visible grokking happens much faster when the training data is met</li>
-<li>To meet the requirements of the assignment we do a small statistical test below</li>
+<li>While our stability is terrible we very much match or exceed the paper, in terms of accuracy reached on percent training data</li>
+<li>Also, clearly visible grokking happens much faster when the training data is met</li>
+<li>And to meet the requirements of the assignment, we do a small statistical test below</li>
 </ul>
 <h4 id="The-accuracies-should-in-theory-have-been-done-with-cross-fold-validation">The accuracies should in theory have been done with cross fold validation<a class="anchor-link" href="#The-accuracies-should-in-theory-have-been-done-with-cross-fold-validation">&#182;</a></h4><ul>
-<li>This was note done as this is really just a small piece of the project and compute time is rather significant - it was decied this wasn't worth it</li>
+<li>This was note done as this is really just a small piece of the project and compute time is rather significant - it was decided this was not worth it</li>
 </ul>
 
 </div>
@@ -15322,13 +15320,12 @@ jp-needs-light-background
 </li>
 <li>There actually isn't a ton of relevant literature on enforcing singular values (although there is a lot of research on orthogonal matrices and CNN's)<ul>
 <li>Why is this though?</li>
-<li>We like to believe it is because methods involved computing the svd of the weights</li>
-<li>this is prohibitively expensive</li>
+<li>We like to believe it is because methods involved computing the svd of the weights as this is prohibitively expensive</li>
 </ul>
 </li>
 </ul>
 <h4 id="Paper-3">Paper 3<a class="anchor-link" href="#Paper-3">&#182;</a></h4><ul>
-<li>But there is one very interesting paper!</li>
+<li>But this is one very interesting paper!</li>
 <li>This beautiful <a href="https://arxiv.org/pdf/2009.13977.pdf">paper</a> which recieved a neurips spotlight proposed SVD neural networks</li>
 <li>Essentially they represented each weight as its SVD decompositions ($U$, $S$, $V$) and trained them<ul>
 <li>This would be nice... but U and V must be orthogonal for this to make any sense<ul>
@@ -15358,7 +15355,7 @@ jp-needs-light-background
 </li>
 </ul>
 <h3 id="Proposed-ideas">Proposed ideas<a class="anchor-link" href="#Proposed-ideas">&#182;</a></h3><ul>
-<li>Okay we have some reasons to believe we might be able to accomplish the task<ul>
+<li>Okay, we have some reasons to believe we might be able to accomplish the task!<ul>
 <li>This looks like enforcing some &quot;smallness&quot; rules on our singular values</li>
 </ul>
 </li>
@@ -15375,7 +15372,7 @@ jp-needs-light-background
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h3 id="Using-householder-matrices-on-mnist">Using householder matrices on mnist<a class="anchor-link" href="#Using-householder-matrices-on-mnist">&#182;</a></h3><ul>
+<h4 id="Using-householder-matrices-on-mnist">Using householder matrices on mnist<a class="anchor-link" href="#Using-householder-matrices-on-mnist">&#182;</a></h4><ul>
 <li>Mnist is great because its very learnable</li>
 </ul>
 <h4 id="Key-limitation-of-householder">Key limitation of householder<a class="anchor-link" href="#Key-limitation-of-householder">&#182;</a></h4><ul>
@@ -15415,7 +15412,7 @@ jp-needs-light-background
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <h4 id="Implementation-of-Necessary-classes">Implementation of Necessary classes<a class="anchor-link" href="#Implementation-of-Necessary-classes">&#182;</a></h4><ul>
-<li>Essentially we want a linear layer that stores the singular values</li>
+<li>Essentially, we want a linear layer that stores the singular values</li>
 <li>It's useful to abstract the house holder matrices to modules<ul>
 <li>We can vary the number of house holder matrices later</li>
 </ul>
@@ -15428,11 +15425,11 @@ jp-needs-light-background
 </li>
 </ul>
 <h4 id="What-the-hell-is-setHouseOrthNHouseHolders!!!">What the hell is setHouseOrthNHouseHolders!!!<a class="anchor-link" href="#What-the-hell-is-setHouseOrthNHouseHolders!!!">&#182;</a></h4><ul>
-<li>Why I'm glad you asked</li>
-<li>For reasons well beyond me I can't properly segment the parameters when using a parameter list</li>
-<li>So I write a function that outputs the houseOrth as a string with the right number of parameters</li>
+<li>Why I'm glad you asked!</li>
+<li>For reasons well beyond me, I can't properly segment the parameters when using a parameter list</li>
+<li>So, I write a function that outputs the houseOrth as a string with the right number of parameters</li>
 <li>We can then call exec on that object to set the number of householder matrices</li>
-<li>I'm as upset as you are about this</li>
+<li>Yes, I am as upset as you are about this!</li>
 </ul>
 
 </div>
@@ -15835,8 +15832,8 @@ jp-needs-light-background
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h3 id="Oh-my-god-it-works!">Oh my god it works!<a class="anchor-link" href="#Oh-my-god-it-works!">&#182;</a></h3><ul>
-<li>I was not expecting that!</li>
+<h3 id="Oh-my-God-it-works!!">Oh my God it works!!<a class="anchor-link" href="#Oh-my-God-it-works!!">&#182;</a></h3><ul>
+<li>I was not expecting that!!</li>
 <li>The model performs better with more householder matrices repersenting each orthogonal matrix</li>
 <li>It learns slightly slower (and is less stable (analysis would take too long in compute time))<ul>
 <li>But it does nearly as well as the standard model!</li>
@@ -15917,11 +15914,11 @@ jp-needs-light-background
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h3 id="Dear-god-we-have-to-implement-this">Dear god we have to implement this<a class="anchor-link" href="#Dear-god-we-have-to-implement-this">&#182;</a></h3><ul>
-<li>Implement a full transformer under the same rules as our previous network</li>
-<li>To make our lives less miserable<ul>
+<h3 id="Dear-God-we-have-to-implement-this!">Dear God we have to implement this!<a class="anchor-link" href="#Dear-God-we-have-to-implement-this!">&#182;</a></h3><ul>
+<li>Implementing a full transformer under the same rules as our previous network</li>
+<li>To make our lives less miserable:<ul>
 <li>We will one hot encode the inputs so we don't have to implement an embedding layer<ul>
-<li>If you think this is cheating we are sorry, but this is an amount of time</li>
+<li>(sidenote) If you think this is cheating, we are sorry, but this is an amount of time!</li>
 </ul>
 </li>
 </ul>
@@ -15940,7 +15937,8 @@ jp-needs-light-background
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <h3 id="Implementation-difficulties">Implementation difficulties<a class="anchor-link" href="#Implementation-difficulties">&#182;</a></h3><ul>
 <li>Transformers are at most steps are 3D tensors</li>
-<li>This... This complicates the task</li>
+<li>This.....</li>
+<li>Well, this complicates the task</li>
 </ul>
 
 </div>
@@ -15954,10 +15952,10 @@ jp-needs-light-background
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <h3 id="Layernorm">Layernorm<a class="anchor-link" href="#Layernorm">&#182;</a></h3><ul>
-<li>We send the non affine steps off to torch</li>
+<li>We send the non-affine steps off to torch</li>
 <li>Implementing the affine steps is very difficult</li>
-<li>And not implementing them doesn't seem to be breaking<ul>
-<li>If this is an issue we will implement later it seems</li>
+<li>And not implementing them does not seem to be breaking<ul>
+<li>If this is an issue, we will implement later, it seems</li>
 </ul>
 </li>
 </ul>
@@ -16037,8 +16035,8 @@ jp-needs-light-background
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <h4 id="Reimplementing-LinearSVD-etc-for-3-Tensors">Reimplementing LinearSVD etc for 3 Tensors<a class="anchor-link" href="#Reimplementing-LinearSVD-etc-for-3-Tensors">&#182;</a></h4><ul>
-<li>Why are we reimplementing rather than replacing earlier<ul>
-<li>Honestly we do not know if the math here is at all reasonable</li>
+<li>Why are we reimplementing rather than replacing earlier?<ul>
+<li>Honestly, we do not know if the math here is at all reasonable</li>
 <li>Not that our confidence levels earlier are super high</li>
 <li>But this is lower</li>
 </ul>
@@ -16205,7 +16203,7 @@ jp-needs-light-background
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <h3 id="All-of-the-following-code-is-fundamentally-copied">All of the following code is fundamentally copied<a class="anchor-link" href="#All-of-the-following-code-is-fundamentally-copied">&#182;</a></h3><ul>
-<li>We take from TrueGrad which takes from pytorch implementation I believe</li>
+<li>We took from TrueGrad which takes from pytorch implementation, I believe</li>
 <li>For the sake of being able to navigate the most insane jupyter notebook ever, I don't include the citations<ul>
 <li>But it is copied! Changing only to respect SVD linear implementation</li>
 </ul>
@@ -16866,7 +16864,6 @@ jp-needs-light-background
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-
 </div>
 </div>
 <div class="jp-OutputArea-child">
@@ -16907,9 +16904,9 @@ jp-needs-light-background
 </li>
 <li>It isn't grokking better</li>
 <li>Note: this is from a saved model trained on these parameters, the model is 10GB in size<ul>
-<li>Therefore I do not want to &quot;load&quot; it or upload it, it will crash so you'll just have to believe us here</li>
+<li>Therefore, I do not want to &quot;load&quot; it or upload it, it will crash, so, you'll just have to believe us here</li>
 <li>We wouldn't lie about such dissapointing results</li>
-<li>We stopped very early in trainaing because it just takes so long</li>
+<li>We stopped very early in training because it just takes really long</li>
 </ul>
 </li>
 </ul>
@@ -16985,7 +16982,7 @@ jp-needs-light-background
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <h3 id="Same-as-before-but-this-is-from-the-training-above">Same as before but this is from the training above<a class="anchor-link" href="#Same-as-before-but-this-is-from-the-training-above">&#182;</a></h3><ul>
-<li>So 1300 training samples and more epochs</li>
+<li>So, 1300 training samples and more epochs</li>
 <li>It's harder to train more than this unfortunately due to time constraints</li>
 <li>This took two hours of training time</li>
 </ul>
@@ -17066,11 +17063,11 @@ jp-needs-light-background
 <li>This was learnable, but not small enough to force grokking</li>
 </ul>
 </li>
-<li>In theory their could be a smarter way to enforce singular value rules</li>
+<li>In theory, there could be a smarter way to enforce singular value rules</li>
 </ul>
 <h4 id="Slowness">Slowness<a class="anchor-link" href="#Slowness">&#182;</a></h4><ul>
 <li>Treating every weight matrix as a product of orthognal matrices makes the model incredibly slow<ul>
-<li>Even if it was to work without huge improvements to the implementation it isn't reasonable</li>
+<li>Even if it was to work, but without huge improvements to the implementation, it isn't reasonable</li>
 <li>fasth the library mentioned earlier does implement it fairly well but it would cause even more memory issues</li>
 </ul>
 </li>
@@ -17084,10 +17081,10 @@ jp-needs-light-background
 <h4 id="Further-work">Further work<a class="anchor-link" href="#Further-work">&#182;</a></h4><ul>
 <li>The code should serve as a good basis for future work</li>
 <li>LinearSVD should probably take the norm value for the singular values</li>
-<li>Theoretically you could train a model to quicky overfit and then do a decomposition on the weights and train from their - this would be good for speed</li>
+<li>Theoretically, you could train a model to quicky overfit and then do a decomposition on the weights and train from their - this would be good for speed</li>
 </ul>
 <h4 id="Hypothesis-testing">Hypothesis testing<a class="anchor-link" href="#Hypothesis-testing">&#182;</a></h4><ul>
-<li>Unfortunately results were never good enough to do a statistical test on - you would have to see improvement for that to make sense and the runtime just doesn't make that tenanble</li>
+<li>Unfortunately, the results were never good enough to do a statistical test on - you would have to see improvement for that to make sense and the runtime just doesn't make that tenanble</li>
 </ul>
 
 </div>
